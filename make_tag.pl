@@ -133,8 +133,13 @@ sub performCopy
 	}
 	else
 	{
+		#Strip out any username field that is hanging around
+		my $strippedRepositoryRoot = $repositoryRoot;
+		$strippedRepositoryRoot =~ s/\/\/(.)*\@/\/\//;
+
 		#This converts a reference to a full URL
-		$source =~ s/\^/$repositoryRoot/;
+		$source =~ s/\^/$strippedRepositoryRoot/;
+		
 
 		my $cmd = "svn copy  --ignore-externals \"$source\" $destination";
 		printDebugWithIndent($indent, $cmd);
@@ -179,6 +184,7 @@ sub checkForAndCopyExternals
 	$source =~ s/\.\///;
 	
 	my $repositoryRoot = getSvnInfo('Repository Root', $source);
+	printWithIndent($indent, "...  source: $source    \t root:$repositoryRoot");
 	
 	printWithIndent($indent,  "Checking for externals ($source,$tagPath)");
 	$cmd = "svn propget svn:externals -R $source";
